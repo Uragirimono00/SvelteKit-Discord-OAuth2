@@ -7,7 +7,7 @@ export const handle = (async ({ event, resolve }) => {
 	event.locals.user = fetchSession(sessionID);
 	
 	if (event.url.pathname.startsWith('/protected')) {
-		if (!event.locals.user) throw redirect(303, '/');
+		// if (!event.locals.user) throw redirect(303, '/');
 	}
 
 	return await resolve(event);

@@ -30,44 +30,47 @@ export const GET: RequestHandler = async ({ url }) => {
             }
         });
 
-        const AccessData = AuthRes.data.data;
+        console.log(AuthRes.data.data);
 
-        console.log(AccessData);
-        console.log(AccessData.accessToken);
-        console.log(code.toString());
+
+
 
         // Get the user's data using the access token
-        const UserRes = await axios.get(`http://52.79.222.211:8090/user/1`, {
-            headers: {
-                Authorization: `Bearer ${AccessData.accessToken}`,
-            }
-        });
-
-        const UserData = AuthRes.data.data;
-        console.log(UserData);
-        console.log(UserData.username);
+        // const UserRes = await axios.get(`https://discord.com/api/v10/users/@me`, {
+        //     headers: {
+        //         Authorization: `Bearer ${AccessData.access_token}`,
+        //     }
+        // });
+        //
+        // const UserData: APIUser = UserRes.data;
 
         // Create new session for the user
-        const SessionID = setSession(UserData, AccessData);
-
+        // const SessionID = setSession(UserData, AccessData);
 
 
         // Optionally, you can upsert the user in the DB here
 
         // Redirect the user and set the session cookie
-        return new Response('', {
-            status: 307,
-            headers: {
-                'Set-Cookie': cookie.serialize('session_id', SessionID as string, {
-                    path: '/',
-                    httpOnly: true,
-                    sameSite: false,
-                    secure: process.env.NODE_ENV === 'production',
-                    maxAge: AccessData.expires_in
-                }),
-                // Location: '/protected'
-            }
-        })
+        const accessToken = AuthRes.data.data.accessToken;
+        const refreshToken = AuthRes.data.data.refreshToken;
+
+        const cookieOptions = {
+            path: '/',
+            // httpOnly: true,
+            sameSite: false,
+            secure: process.env.NODE_ENV === 'production'
+        };
+
+        const headers : any = {
+            'Set-Cookie': [
+                cookie.serialize('accessToken', accessToken, cookieOptions),
+                cookie.serialize('refreshToken', refreshToken, cookieOptions)
+            ],
+            Location: '/protected',
+        };
+
+        return new Response('', { status: 307, headers });
+
 
     } catch (error) {
         console.log(error);
