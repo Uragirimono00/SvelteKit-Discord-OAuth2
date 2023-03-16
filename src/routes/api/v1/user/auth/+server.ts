@@ -23,35 +23,34 @@ export const GET: RequestHandler = async ({ url }) => {
 
     try {
         // Get the authentication object using the user's code
-        const AuthRes = await axios.post('https://discord.com/api/v10/oauth2/token', FormData.toString(), {
+        // const AuthRes = await axios.post('https://discord.com/api/v10/oauth2/token', FormData.toString(), {
+        const AuthRes = await axios.get('http://52.79.222.211:8090/auth/discord?code=' + code.toString(), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             }
         });
 
-        const AccessData: RESTPostOAuth2AccessTokenResult = AuthRes.data;
+        const AccessData = AuthRes.data.data;
+
+        console.log(AccessData);
+        console.log(AccessData.accessToken);
+        console.log(code.toString());
 
         // Get the user's data using the access token
-        const UserRes = await axios.get(`https://discord.com/api/v10/users/@me`, {
+        const UserRes = await axios.get(`http://52.79.222.211:8090/user/1`, {
             headers: {
-                Authorization: `Bearer ${AccessData.access_token}`,
+                Authorization: `Bearer ${AccessData.accessToken}`,
             }
         });
 
-        const UserData: APIUser = UserRes.data;
-
-        // Get the guilds the user is in
-        const UserGuildRes = await axios.get(`https://discord.com/api/v10/users/@me/guilds`, {
-            headers: {
-                Authorization: `Bearer ${AccessData.access_token}`,
-            }
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const UserGuildData: TPartialGuild[] = UserGuildRes.data;
+        const UserData = AuthRes.data.data;
+        console.log(UserData);
+        console.log(UserData.username);
 
         // Create new session for the user
         const SessionID = setSession(UserData, AccessData);
+
+
 
         // Optionally, you can upsert the user in the DB here
 
@@ -66,7 +65,7 @@ export const GET: RequestHandler = async ({ url }) => {
                     secure: process.env.NODE_ENV === 'production',
                     maxAge: AccessData.expires_in
                 }),
-                Location: '/protected'
+                // Location: '/protected'
             }
         })
 

@@ -1,5 +1,4 @@
 <script>
-	// @ts-ignore
 	import { PUBLIC_DISCORD_AUTH_URI } from '$env/static/public';
 
 </script>
